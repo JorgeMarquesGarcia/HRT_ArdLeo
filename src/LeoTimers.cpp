@@ -16,10 +16,16 @@ void Timers::initCounter(int counter_num, int prescaler) {
     cli();   ///Disable global interrupts
     switch (counter_num) {
         case 1:
-            initCounter1(prescaler);
+            if(!counter1_flag){
+                initCounter1(prescaler);
+                counter1_flag = true;
+            }
             break;
         case 3:
-            initCounter3(prescaler);
+            if(!counter3_flag){
+                initCounter3(prescaler);
+                counter3_flag = true;
+            }
             break;
         default:
             printf("Timer not available\n");
@@ -95,11 +101,18 @@ void Timers::setTimer(int timer_num, float _time_sec) {
             setTimer2(_time_sec);
             break;
         case 3:
+            TIMSK1 = bit(OCIE1A) | bit(OCIE1B) | bit(OCIE1C);
             setTimer3(_time_sec);
-            break;
         case 4:
-            TIMSK3 =  bit(OCIE3A) | bit(OCIE3B);
             setTimer4(_time_sec);
+            break;
+        case 5: 
+            TIMSK3 =  bit(OCIE3A) | bit(OCIE3B);
+            setTimer5(_time_sec);
+            break;
+        case 6: 
+            TIMSK3 =  bit(OCIE3A) | bit(OCIE3B) | bit(OCIE3C);
+            setTimer6(_time_sec);
             break;
         default:
             printf("Timer not available\n");
@@ -127,6 +140,15 @@ void Timers::setTimer2(float _time_sec) {
 }
 
 void Timers::setTimer3(float _time_sec){
+    long cnt = F_CLOCK / prescaler1 * _time_sec;  // cnt = clk / prescaler * time(s)
+    if (cnt > 65535) {
+        cnt = 65535;        // "timer3 16bit counter over."
+        printf("Timer3 16bit counter over\n");
+    }
+    OCR1C = cnt;          // Output Compare Register Timer3A
+}
+
+void Timers::setTimer4(float _time_sec){
     long cnt = F_CLOCK / prescaler3 * _time_sec;  // cnt = clk / prescaler * time(s)
     if (cnt > 65535) {
         cnt = 65535;        // "timer3 16bit counter over."
@@ -135,13 +157,22 @@ void Timers::setTimer3(float _time_sec){
     OCR3A = cnt;          // Output Compare Register Timer3A
 }
 
-void Timers::setTimer4(float _time_sec_sec){
+void Timers::setTimer5(float _time_sec_sec){
     long cnt = F_CLOCK / prescaler3 * _time_sec_sec;  // cnt = clk / prescaler * time(s)
     if (cnt > 65535) {
         cnt = 65535;        // "timer3 16bit counter over."
         printf("Timer3 16bit counter over\n");
     }
     OCR3B = cnt;          // Output Compare Register Timer3A
+}
+
+void Timers::setTimer6(float _time_sec_sec){
+    long cnt = F_CLOCK / prescaler3 * _time_sec_sec;  // cnt = clk / prescaler * time(s)
+    if (cnt > 65535) {
+        cnt = 65535;        // "timer3 16bit counter over."
+        printf("Timer3 16bit counter over\n");
+    }
+    OCR3C = cnt;          // Output Compare Register Timer3A
 }
 
 void Timers::stopCounter(int counter){
