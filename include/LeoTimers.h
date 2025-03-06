@@ -21,12 +21,16 @@ class Timers {
         void setTimer2(float _time);
         void setTimer3(float _time);
         void setTimer4(float _time);
+        void setTimer5(float _time);
+        void setTimer6(float _time);
         void stopCounter1();
         void stopCounter3();
         
 
         int prescaler1;
         int prescaler3;
+        bool counter1_flag = false;
+        bool counter3_flag = false; 
 };
 
 
